@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.springbootbookstore.mapper.Book2Mapper">
+
+    <select id="allBooks" resultType="org.example.springbootbookstore.entity.Tbbook">
+        select * from tbbook
+    </select>
+
+    <insert id="insertBook" parameterType="org.example.springbootbookstore.entity.Tbbook"
+            useGeneratedKeys="true"
+            keyProperty="id">
+        insert into tbbook(title,author,press,price)
+        values(#{title},#{author},#{press},#{price})
+    </insert>
+
+    <update id="updateBook" parameterType="org.example.springbootbookstore.entity.Tbbook">
+        update tbbook
+        <set>
+            <if test="title != null and title != ''">title=#{title},</if>
+            <if test="author != null and author != ''">author=#{author},</if>
+            <if test="press != null and press != ''">press=#{press},</if>
+            <if test="price != null">price=#{price},</if>
+        </set>
+        where id=#{id}
+    </update>
+
+    <delete id="deleteBook" parameterType="Integer">
+        delete from tbbook where id=#{id}
+    </delete>
+
+    <select id="searchBook" parameterType="map" resultType="org.example.springbootbookstore.entity.Tbbook">
+        select * from tbbook where price between #{minPrice} and #{maxPrice}
+        <if test="title !=null and title!=''">
+            and title like concat('%',#{title},'%')
+        </if>
+        <if test="author !=null and author!=''">
+            and author like concat('%',#{author},'%')
+        </if>
+        <if test="press !=null and press!=''">
+            and press like concat('%',#{press},'%')
+        </if>
+    </select>
+
+    <select id="showComment" parameterType="Integer" resultMap="bookAndComment">
+        select * from tbbook where id=#{id}
+    </select>
+
+    <resultMap id="bookAndComment" type="org.example.springbootbookstore.entity.Tbbook">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="author" column="author"/>
+        <result property="press" column="press"/>
+        <result property="price" column="price"/>
+
+        <collection property="commentList"
+                    ofType="org.example.springbootbookstore.entity.Comment"
+                    column="id"
+                    select="org.example.springbootbookstore.mapper.CommentMapper.selectCommentsById"/>
+    </resultMap>
+
+</mapper>

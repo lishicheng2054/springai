@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html> <head>
+	<meta charset="UTF-8">
+	<title>图书信息管理</title>
+	<link href="css/index.css" rel="stylesheet" type="text/css">
+	<script src="js/jquery-3.4.1.js"></script>
+
+	<script>
+		$(function(){
+			$("#show-panel").hide();
+			$.get("/book2/allBooks",function(result){
+				$.each(result,function(key,value){
+					var id= value.id;
+					var tr="<tr>";
+					tr+="<td><div id='id'>"+id+"</div></td>";
+					tr+="<td><div>"+value.title+"</div><input type='text' name='title' value="+value.title+" size='60' hidden></td>";
+					tr+="<td><div>"+value.author+"</div><input type='text' name='author' value="+value.author+" size='5' hidden></td>";
+					tr+="<td><div>"+value.press+"</div><input type='text' name='press' value="+value.press+" size='20' hidden></td>";
+					tr+="<td><div>"+value.price+"</div><input type='text' name='price' value="+value.price+" size='4' hidden></td>";
+					tr+="<td><a href='javascript:void(0)' onclick='updateBook(this)'>修改</a><input type='button' value='修改' id='b"+id+"' onclick='update(this)' hidden></td>";
+					tr+="<td><a href='javascript:void(0)' onclick='deleteBook(this)'>删除</a></td>";
+					tr+="<td><a href='/book2/showComment?id="+id+"'>详情</a></td>";
+					tr+="<td><a href='javascript:void(0)' onclick='showComment(this)'>查看评论</a></td>";
+					tr+="</tr>";
+					$("#tab").append(tr);
+				});
+			});
+		});
+		function updateBook(obj){
+			$(obj).parents("table").find("input").hide();
+			$(obj).parents("table").find("div,a").show();
+			$(obj).parents("tr").find("div").hide();
+			$(obj).parents("tr").find("#id").show();
+			$(obj).hide();
+			$(obj).parents("tr").find("input").show();
+		}
+		function update(btn){
+			var id=$(btn).attr("id").substr(1);
+			var title=$(btn).parents("tr").find("input[name='title']").val().trim();
+			var author=$(btn).parents("tr").find("input[name='author']").val().trim();
+			var press=$(btn).parents("tr").find("input[name='press']").val().trim();
+			var price=$(btn).parents("tr").find("input[name='price']").val().trim();
+			if(title===""){alert("书名不能为空");return;}
+			if(author===""){alert("作者不能为空");return;}
+			if(press===""){alert("出版社不能为空");return;}
+			if(price===""||isNaN(price)){alert("价格不能为空且必须为数字");return;}
+			$.post("/book2/updateBook",{
+				"id":id,
+				"title":title,
+				"author":author,
+				"press":press,
+				"price":price
+			},function(result){
+				if(result=="修改成功"){
+					window.location.href="index2";
+				}
+			})
+		}
+		function showComment(btn){
+			var id=$(btn).parents("tr").find("#id").text();
+			$.post("/book2/showComment",{"id":id},function(result){
+				if(result.title==null){
+					alert("该图书没有评价");
+				}else{
+					$("#show-panel").show();
+					$("#title").html(result.title);
+					$("#author").html(result.author);
+					$("#press").html(result.press);
+					$("#price").html('￥'+result.price+'元');
+					var tab1="";
+					$("#comment").html("")
+					$.each(result.commentList,function(key,comment){
+						tab1+="<table style='border-width:1px;border-style:dotted;'>";
+						tab1+="<tr><td style='width:100px;'>评价人：</td><td style='width:580px'>"+comment.cAuthor+"</td></tr>";
+						tab1+="<tr><td style='width:100px;'>评价内容：</td><td style='width:580px;'>"+comment.content+"</td></tr>";
+						tab1+="</table>";
+					});
+					$("#comment").append(tab1);
+				}
+			});
+		}
+		function deleteBook(btn){
+			var id=$(btn).parents("tr").find("#id").text();
+			$.post("/book2/deleteBook",{"id":id},function(result){
+				if(result=="删除成功"){
+					$(btn).parents("tr").remove();
+				}
+			});
+		}
+
+		function add(){
+			$("#add-panel").show().css({"left":($(window).width()/2-200)});
+		}
+		function closeBook(){
+			$("#add-panel").hide();
+			$("#show-panel").hide();
+		}
+		function saveBook(){
+			var title=$("#add-panel").find("input[name='title']").val().trim();
+			var author=$("#add-panel").find("input[name='author']").val().trim();
+			var press=$("#add-panel").find("input[name='press']").val().trim();
+			var price=$("#add-panel").find("input[name='price']").val().trim();
+
+			$.post("/book2/insertBook",{
+				"title":title,
+				"author":author,
+				"press":press,
+				"price":price
+			},function(result){
+				if(result==="添加成功"){
+					$("#add-panel").hide();
+					window.location.href="index2";
+				}
+			})
+		}
+		function sortBook(btn){
+			var by=$(btn).attr('id').substring(2);
+			$.post("/book2/sortBook",{"by":by},function(result){
+				$("#tab").html("<caption><b>教材信息</b></caption>\n" +
+						"\t<tr style='border-width:1px;border-style:dotted;'>\n" +
+						"\t\t<th><a href='javascript:void(0)' onclick='sortBook(this)' id='s_id'>id</a></th>" +
+						"<th><a href='javascript:void(0)' onclick='sortBook(this)' id='s_title'>书名</a></th>" +
+						"<th><a href='javascript:void(0)' onclick='sortBook(this)' id='s_author'>作者</a></th>" +
+						"<th><a href='javascript:void(0)' onclick='sortBook(this)' id='s_press'>出版社</a></th>" +
+						"<th><a href='javascript:void(0)' onclick='sortBook(this)' id='s_price'>价格</a></th>" +
+						"<th>修改</th><th>删除</th><th>详情</th>\n" +
+						"\t</tr>");
+				$.each(result,function(key,value){
+					var id= value.id;
+					var tr="<tr>";
+					tr+="<td><div id='id'>"+id+"</div></td>";
+					tr+="<td><div>"+value.title+"</div><input type='text' name='title' value="+value.title+" size='60' hidden></td>";
+					tr+="<td><div>"+value.author+"</div><input type='text' name='author' value="+value.author+" size='5' hidden></td>";
+					tr+="<td><div>"+value.press+"</div><input type='text' name='press' value="+value.press+" size='20' hidden></td>";
+					tr+="<td><div>"+value.price+"</div><input type='text' name='price' value="+value.price+" size='4' hidden></td>";
+					tr+="<td><a href='javascript:void(0)' onclick='updateBook(this)'>修改</a><input type='button' value='修改' id='b"+id+"' onclick='update(this)' hidden></td>";
+					tr+="<td><a href='javascript:void(0)' onclick='deleteBook(this)'>删除</a></td>";
+					tr+="<td><a href='/book2/showComment?id="+id+"'>详情</a></td>";
+					tr+="<td><a href='javascript:void(0)' onclick='showComment(this)'>查看评论</a></td>";
+					tr+="</tr>";
+					$("#tab").append(tr);
+				});
+			})
+		}
+		function searchBook(){
+			var title=$("#search-panel").find("input[name='title']").val().trim();
+			var author=$("#search-panel").find("input[name='author']").val().trim();
+			var press=$("#search-panel").find("input[name='press']").val().trim();
+			var minPrice=$("#search-panel").find("input[name='price']").val().trim();
+			var maxPrice=$("#search-panel").find("input[name='maxprice']").val().trim();
+			$.post("/book2/searchBook",{
+				"title":title,
+				"author":author,
+				"press":press,
+				"price":0.0,
+				"min_price":minPrice,
+				"max_price":maxPrice
+			},function(result){
+				$("#tab").html("<caption><b>教材信息</b></caption>\n" +
+						"\t<tr style='border-width:1px;border-style:dotted;'>\n" +
+						"\t\t<th><a href='javascript:void(0)' onclick='sortBook(this)' id='s_id'>id</a></th>" +
+						"<th><a href='javascript:void(0)' onclick='sortBook(this)' id='s_title'>书名</a></th>" +
+						"<th><a href='javascript:void(0)' onclick='sortBook(this)' id='s_author'>作者</a></th>" +
+						"<th><a href='javascript:void(0)' onclick='sortBook(this)' id='s_press'>出版社</a></th>" +
+						"<th><a href='javascript:void(0)' onclick='sortBook(this)' id='s_price'>价格</a></th>" +
+						"<th>修改</th><th>删除</th><th>详情</th>\n" +
+						"\t</tr>");
+				$.each(result,function(key,value){
+					var id= value.id;
+					var tr="<tr>";
+					tr+="<td><div id='id'>"+id+"</div></td>";
+					tr+="<td><div>"+value.title+"</div><input type='text' name='title' value="+value.title+" size='60' hidden></td>";
+					tr+="<td><div>"+value.author+"</div><input type='text' name='author' value="+value.author+" size='5' hidden></td>";
+					tr+="<td><div>"+value.press+"</div><input type='text' name='press' value="+value.press+" size='20' hidden></td>";
+					tr+="<td><div>"+value.price+"</div><input type='text' name='price' value="+value.price+" size='4' hidden></td>";
+					tr+="<td><a href='javascript:void(0)' onclick='updateBook(this)'>修改</a><input type='button' value='修改' id='b"+id+"' onclick='update(this)' hidden></td>";
+					tr+="<td><a href='javascript:void(0)' onclick='deleteBook(this)'>删除</a></td>";
+					tr+="<td><a href='/book2/showComment?id="+id+"'>详情</a></td>";
+					tr+="<td><a href='javascript:void(0)' onclick='showComment(this)'>查看评论</a></td>";
+					tr+="</tr>";
+					$("#tab").append(tr);
+				});
+			})
+		}
+	</script>
+</head>
+<body>
+<a href="javascript:add()">添加图书</a>
+
+<div id="search-panel">
+	书名：<input type="text" name="title" value="Java"><br/>
+	作者：<input type="text" name="author" value="黑马程序员"><br/>
+	出版社：<input type="text" name="press" value="清华大学出版社"><br/>
+	价格：<input type="text" name="price" value="0">-
+	<input type="text" name="maxprice" value="100"><br/>
+	<button id="search-btn" onclick="javascript:searchBook()">查询</button><br/>
+</div>
+<div id="div1"></div>
+
+<table id="tab" style='width:990px;border-width:1px;border-style:dotted;font-size:14px;border-color:red;'>
+	<caption><b>教材信息</b></caption>
+	<tr style='border-width:1px;border-style:dotted;'>
+
+		<th><a href="javascript:void(0)" onclick="sortBook(this)" id="s_id">id</a></th>
+		<th><a href="javascript:void(0)" onclick="sortBook(this)" id="s_title">书名</a></th>
+		<th><a href="javascript:void(0)" onclick="sortBook(this)" id='s_author'>作者</a></th>
+		<th><a href="javascript:void(0)" onclick="sortBook(this)" id='s_press'>出版社</a></th>
+		<th><a href="javascript:void(0)" onclick="sortBook(this)" id='s_price'>价格</a></th>
+		<th>修改</th><th>删除</th><th>详情</th><th>查看评论</th>
+	</tr>
+</table>
+<div id="add-panel">
+	<div>&nbsp;</div>
+	<table style='width:400px;border-width:1px;border-style:dotted;font-size:14px;border-color:red;'>
+		<caption><b>添加图书</b></caption>
+		<tr style="border-width:1px;border-style:dotted;">
+			<td>书名</td><td><input type="text" name="title" value="PHP从入门到精通"></td>
+		</tr>
+		<tr style="border-width:1px;border-style:dotted;">
+			<td>作者</td><td><input type="text" name="author" value="潘凯华"></td>
+		</tr>
+		<tr style="border-width:1px;border-style:dotted;">
+			<td>出版社</td><td><input type="text" name="press" value="清华大学出版社"></td>
+		</tr>
+		<tr style="border-width:1px;border-style:dotted;">
+			<td>价格</td><td><input type="text" name="price" value="69.8"></td>
+		</tr>
+		<tr style="border-width:1px;border-style:dotted;">
+			<td colspan="2" align="center">
+				<button id="add-btn" onclick="javascript:saveBook()">保存</button>
+				<button id="close-btn1" onclick="javascript:closeBook()">关闭</button>
+			</td>
+		</tr>
+	</table>
+</div>
+
+<div id="show-panel">
+	<table style='width:680px;border-width:1px;border-style:dotted;font-size:14px;border-color:red;'>
+		<caption><b>图书详情</b></caption>
+		<tr style="border-width:1px;border-style:dotted;">
+			<td style='width:60px;'>书名：</td><td><div id="title"></div></td>
+		</tr>
+		<tr style="border-width:1px;border-style:dotted;">
+			<td style='width:60px;'>作者:</td><td><div id="author"></div></td>
+		</tr>
+		<tr style="border-width:1px;border-style:dotted;">
+			<td style='width:60px;'>出版社:</td><td><div id="press"></div></td>
+		</tr>
+		<tr style="border-width:1px;border-style:dotted;">
+			<td style='width:60px;'>价格:</td><td><div id="price"></div></td>
+		</tr>
+		<tr style="border-width:1px;border-style:dotted;">
+			<td  colspan="2" align="center"><b>评价详情</b></td></td>
+		</tr>
+		<tr style="border-width:1px;border-style:dotted;">
+			<table id="comment" style="width:680px;border-width:1px;border-style:dotted;">
+
+			</table>
+		</tr>
+		<tr style="border-width:1px;border-style:dotted;">
+			<td colspan="2" style="align-content: center">
+				<button id="close-btn" onclick="javascript:closeBook()">关闭</button>
+			</td>
+		</tr>
+	</table>
+</div>
+
+</body>
+</html>
