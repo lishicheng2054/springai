@@ -7,6 +7,7 @@ import ResultPage from './pages/ResultPage'
 import KnowledgeBaseListPage from './pages/KnowledgeBaseListPage'
 import KnowledgeBaseDetailPage from './pages/KnowledgeBaseDetailPage'
 import KnowledgeBaseChatPage from './pages/KnowledgeBaseChatPage'
+import InterviewSchedulePage from './pages/InterviewSchedulePage'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="kb" element={<KnowledgeBaseListPage />} />
         <Route path="kb/:kbId" element={<KnowledgeBaseDetailPage />} />
         <Route path="kb/:kbId/chat" element={<KnowledgeBaseChatPage />} />
+        <Route path="schedule" element={<InterviewSchedulePage />} />
       </Route>
     </Routes>
   )

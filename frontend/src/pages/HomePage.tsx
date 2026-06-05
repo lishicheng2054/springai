@@ -30,6 +30,12 @@ export default function HomePage() {
         >
           知识库管理
         </button>
+        <button
+          onClick={() => navigate('/schedule')}
+          className="w-full px-6 py-3 bg-slate-100 text-slate-700 rounded-xl text-sm font-medium hover:bg-slate-200 transition-colors"
+        >
+          面试安排
+        </button>
       </div>
 
       <div className="mt-16 grid grid-cols-4 gap-6 text-center">
