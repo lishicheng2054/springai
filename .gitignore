@@ -1,0 +1,24 @@
+# Gradle
+.gradle/
+build/
+bin/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+
+# Frontend
+frontend/node_modules/
+frontend/dist/

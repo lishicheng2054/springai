@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: springai-interview-beginner
+
+  # PostgreSQL 数据源
+  datasource:
+    url: jdbc:postgresql://localhost:5432/interview_beginner
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: password
+
+  # JPA
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  # Spring AI (DeepSeek 兼容 OpenAI 协议)
+  ai:
+    openai:
+      api-key: ${DEEPSEEK_API_KEY:}
+      base-url: https://api.deepseek.com
+      chat:
+        options:
+          model: deepseek-chat
+          temperature: 0.7
+
+app:
+  cors:
+    allowed-origins: http://localhost:5173
