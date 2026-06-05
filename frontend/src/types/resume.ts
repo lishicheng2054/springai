@@ -13,5 +13,19 @@ export interface ResumeResponse {
   targetPosition: string
   resumeText: string
   sourceType: string
+  fileName?: string
+  fileType?: string
+  fileSize?: number
   createdAt: string
+}
+
+/** AI简历分析结果 */
+export interface ResumeAnalysisResponse {
+  resumeId: number
+  summary: string
+  skills: string[]
+  advantages: string[]
+  risks: string[]
+  suggestions: string[]
+  analysisStatus: string
 }

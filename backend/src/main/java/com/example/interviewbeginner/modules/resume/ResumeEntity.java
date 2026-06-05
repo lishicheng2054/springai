@@ -41,10 +41,22 @@ public class ResumeEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String resumeText;
 
-    /** 简历来源类型：TEXT */
+    /** 简历来源类型：TEXT / FILE */
     @Column(nullable = false, length = 20)
     @Builder.Default
     private String sourceType = "TEXT";
+
+    /** 上传文件名 */
+    @Column(name = "file_name", length = 500)
+    private String fileName;
+
+    /** 文件类型 */
+    @Column(name = "file_type", length = 100)
+    private String fileType;
+
+    /** 文件大小（字节） */
+    @Column(name = "file_size")
+    private Long fileSize;
 
     /** 创建时间 */
     @Column(nullable = false, updatable = false)

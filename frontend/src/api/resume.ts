@@ -1,10 +1,23 @@
 import request from './request'
-import type { ResumeRequest, ResumeResponse } from '../types/resume'
+import type { ResumeRequest, ResumeResponse, ResumeAnalysisResponse } from '../types/resume'
 
-export async function createResume(
-  req: ResumeRequest
-): Promise<{ resumeId: number }> {
+export async function createResume(req: ResumeRequest): Promise<{ resumeId: number }> {
   const { data } = await request.post<{ resumeId: number }>('/api/resumes', req)
+  return data
+}
+
+/** 文件上传简历 */
+export async function uploadResume(
+  candidateName: string, targetPosition: string, file: File
+): Promise<ResumeResponse> {
+  const formData = new FormData()
+  formData.append('candidateName', candidateName)
+  formData.append('targetPosition', targetPosition)
+  formData.append('file', file)
+  const { data } = await request.post<ResumeResponse>('/api/resumes/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000,
+  })
   return data
 }
 
@@ -15,5 +28,17 @@ export async function getResume(id: number): Promise<ResumeResponse> {
 
 export async function listResumes(): Promise<ResumeResponse[]> {
   const { data } = await request.get<ResumeResponse[]>('/api/resumes')
+  return data
+}
+
+/** 触发AI分析 */
+export async function analyzeResume(resumeId: number): Promise<ResumeAnalysisResponse> {
+  const { data } = await request.post<ResumeAnalysisResponse>(`/api/resumes/${resumeId}/analyze`)
+  return data
+}
+
+/** 获取AI分析结果 */
+export async function getAnalysis(resumeId: number): Promise<ResumeAnalysisResponse> {
+  const { data } = await request.get<ResumeAnalysisResponse>(`/api/resumes/${resumeId}/analysis`)
   return data
 }

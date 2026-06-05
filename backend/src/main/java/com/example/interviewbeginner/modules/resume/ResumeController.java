@@ -1,16 +1,18 @@
 package com.example.interviewbeginner.modules.resume;
 
 import com.example.interviewbeginner.common.result.Result;
+import com.example.interviewbeginner.modules.resume.dto.ResumeAnalysisResponse;
 import com.example.interviewbeginner.modules.resume.dto.ResumeRequest;
 import com.example.interviewbeginner.modules.resume.dto.ResumeResponse;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -20,19 +22,32 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/resumes")
-@RequiredArgsConstructor
-
 public class ResumeController {
 
     private final ResumeService resumeService;
 
+    public ResumeController(ResumeService resumeService) {
+        this.resumeService = resumeService;
+    }
+
     /**
-     * 创建简历。
+     * 文本创建简历。
      */
     @PostMapping
     public Result<Map<String, Long>> createResume(@Valid @RequestBody ResumeRequest request) {
         ResumeResponse response = resumeService.createResume(request);
         return Result.success(Map.of("resumeId", response.id()));
+    }
+
+    /**
+     * 文件上传创建简历（PDF/Word/TXT）。
+     */
+    @PostMapping("/upload")
+    public Result<ResumeResponse> uploadResume(
+            @RequestParam("candidateName") String candidateName,
+            @RequestParam("targetPosition") String targetPosition,
+            @RequestParam("file") MultipartFile file) {
+        return Result.success(resumeService.uploadResume(candidateName, targetPosition, file));
     }
 
     /**
@@ -49,5 +64,21 @@ public class ResumeController {
     @GetMapping
     public Result<List<ResumeResponse>> listResumes() {
         return Result.success(resumeService.listResumes());
+    }
+
+    /**
+     * AI 分析简历。
+     */
+    @PostMapping("/{resumeId}/analyze")
+    public Result<ResumeAnalysisResponse> analyzeResume(@PathVariable Long resumeId) {
+        return Result.success(resumeService.analyzeResume(resumeId));
+    }
+
+    /**
+     * 获取简历分析结果。
+     */
+    @GetMapping("/{resumeId}/analysis")
+    public Result<ResumeAnalysisResponse> getAnalysis(@PathVariable Long resumeId) {
+        return Result.success(resumeService.getAnalysis(resumeId));
     }
 }

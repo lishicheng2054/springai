@@ -13,11 +13,11 @@ public record ResumeResponse(
         String targetPosition,
         String resumeText,
         String sourceType,
+        String fileName,
+        String fileType,
+        Long fileSize,
         LocalDateTime createdAt
 ) {
-    /**
-     * 从实体转换为响应体。
-     */
     public static ResumeResponse fromEntity(ResumeEntity entity) {
         return new ResumeResponse(
                 entity.getId(),
@@ -25,6 +25,9 @@ public record ResumeResponse(
                 entity.getTargetPosition(),
                 entity.getResumeText(),
                 entity.getSourceType(),
+                entity.getFileName(),
+                entity.getFileType(),
+                entity.getFileSize(),
                 entity.getCreatedAt()
         );
     }
